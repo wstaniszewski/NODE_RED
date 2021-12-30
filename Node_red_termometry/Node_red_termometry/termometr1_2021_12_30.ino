@@ -158,7 +158,27 @@ void reconnect() {
 // The setup function sets your ESP GPIOs to Outputs, starts the serial communication at a baud rate of 115200
 // Sets your mqtt broker and sets the callback function
 // The callback function is what receives messages and actually controls the LEDs
-void setup() {
+
+// Santos czyjnij DS18B20
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+// GPIO where the DS18B20 is connected to
+const int oneWireBus = 4;     
+int temp=0;
+
+// Setup a oneWire instance to communicate with any OneWire devices
+OneWire oneWire(oneWireBus);
+
+// Pass our oneWire reference to Dallas Temperature sensor 
+DallasTemperature sensors(&oneWire);
+
+
+
+
+
+void setup() {  
   pinMode(led1, OUTPUT);
     pinMode(zawor, OUTPUT);
 
@@ -170,6 +190,10 @@ void setup() {
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
+
+  // Start the DS18B20 sensor
+  sensors.begin();
+
 
 }
 
@@ -210,7 +234,7 @@ int a = analogRead(pinTempSensor);
   static char temperature1[7];
   dtostrf(temperature, 6, 2, temperature1 );
     
-  client.publish("kuchnia/temp_zaw", temperature1);   //wywala bad
+  client.publish("temp/temp1", temperature1);  
    
     }
 
@@ -220,6 +244,12 @@ int a = analogRead(pinTempSensor);
   }
   
     delay(100);
+ sensors.requestTemperatures(); 
+  float temperatureC = sensors.getTempCByIndex(0);
+  float temperatureF = sensors.getTempFByIndex(0);
+  Serial.print(temperatureC);
+  Serial.println("ºC");
+  float temp=temperatureC;
 
 
 } 
