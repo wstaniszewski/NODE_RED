@@ -32,15 +32,19 @@ const int pinTempSensor = A0;     // Grove - Temperature Sensor connect to A0
 
 
 // Change the credentials below, so your ESP8266 connects to your led_diode
-const char* ssid = "TP-Link_D9FF";
-const char* password = "30503434";
+const char* ssid = "wojtek24";
+const char* password = "staniszewski123456";
 
 // Change the variable to your Raspberry Pi IP address, so it connects to your MQTT broker
 const char* mqtt_server = "192.168.0.2";
+//const int mqttPort = 12948;
+const char* mqttUser = "wojtek";
+const char* mqttPassword = "tigerclaw12";
+
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
-WiFiClient esp_test;
-PubSubClient client(esp_test);
+WiFiClient esp_termo1;
+PubSubClient client(esp_termo1);
 
 
 
@@ -92,7 +96,7 @@ void callback(String topic, byte* message, unsigned int length) {
 
   // If a message is received on the topic kuchnia/podlewanie, you check if the message is either on or off. Turns the lamp GPIO according to the message
   if(topic=="kuchnia/podlewanie"){
-      Serial.print("esp_test  jest ");
+      Serial.print("esp_termo1  jest ");
       if(messageTemp == "on"){
         digitalWrite(led1, HIGH);
         digitalWrite(zawor, HIGH);
@@ -135,7 +139,7 @@ void reconnect() {
        if (client.connect("ESP2_Garage")) {
       That should solve your MQTT multiple connections problem
     */
-    if (client.connect("esp_test")) {
+    if (client.connect("esp_termo1", mqttUser, mqttPassword)) {
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
       // You can subscribe to more topics (to control more LEDs in this example)
@@ -176,7 +180,7 @@ void loop() {
     reconnect();
   }
   if(!client.loop())
-    client.connect("esp_test");
+    client.connect("esp_termo1");
 
   now = millis();
 
