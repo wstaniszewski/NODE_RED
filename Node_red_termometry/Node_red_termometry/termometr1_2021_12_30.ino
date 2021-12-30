@@ -36,10 +36,10 @@ const char* ssid = "wojtek24";
 const char* password = "staniszewski123456";
 
 // Change the variable to your Raspberry Pi IP address, so it connects to your MQTT broker
-const char* mqtt_server = "192.168.0.2";
+const char* mqtt_server = "192.168.0.10";
 //const int mqttPort = 12948;
 const char* mqttUser = "wojtek";
-const char* mqttPassword = "tigerclaw12";
+const char* mqttPassword = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
 
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
@@ -52,7 +52,7 @@ PubSubClient client(esp_termo1);
 const int led1 = D3;
 const int zawor = D4;
 const int lamp3 = D5;
-
+  static char temperature1[7];
 
 
 // Timers auxiliar variables
@@ -143,8 +143,8 @@ void reconnect() {
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
       // You can subscribe to more topics (to control more LEDs in this example)
-      client.subscribe("kuchnia/podlewanie");
-        client.subscribe("kuchnia/temp_zaw");
+  //    client.subscribe("kuchnia/podlewanie");
+        client.subscribe("temp/temp1");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -166,7 +166,7 @@ void reconnect() {
 
 // GPIO where the DS18B20 is connected to
 const int oneWireBus = 4;     
-int temp=0;
+float temp=0.2;
 
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(oneWireBus);
@@ -186,7 +186,7 @@ void setup() {
   
   
   
-  Serial.begin(115200);
+  Serial.begin(9600);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(callback);
@@ -199,12 +199,11 @@ void setup() {
 
 // For this project, you don't need to change anything in the loop function. Basically it ensures that you ESP is connected to your broker
 void loop() {
-
   if (!client.connected()) {
     reconnect();
   }
   if(!client.loop())
-    client.connect("esp_termo1");
+    client.connect("esp_test");
 
   now = millis();
 
@@ -215,10 +214,30 @@ int a = analogRead(pinTempSensor);
     float R = 1023.0/a-1.0;
     R = R0*R;
  
-     float temperature = 1.0/(log(R/R0)/B+1/298.15)-273.15; // convert to temperature via datasheet
+     //float temperature = 1.0/(log(R/R0)/B+1/298.15)-273.15; // convert to temperature via datasheet
+     
+     float temperature = - 1.22;
+     
+     
+     // wyliczenia temperatury santosa dla DS18B20
+     
+       sensors.requestTemperatures(); 
+  float temperatureC = sensors.getTempCByIndex(0);
+  float temperatureF = sensors.getTempFByIndex(0);
+  //Serial.print(temperatureC);
+  //Serial.println("ºC");
+  temp=temperatureC;
+
+     
+     
+     
+     
+     
+     
+     
  
     Serial.print("temperature = ");
-    Serial.println(temperature);
+    Serial.println(temp);
 
 
     // Publishes new temperature and humidity every 30 seconds
@@ -232,9 +251,9 @@ int a = analogRead(pinTempSensor);
 // konieczna obrobka sygnalu https://www.hobbytronics.co.uk/arduino-float-vars   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
   static char temperature1[7];
-  dtostrf(temperature, 6, 2, temperature1 );
+  dtostrf(temp, 6, 2, temperature1 );
     
-  client.publish("temp/temp1", temperature1);  
+  client.publish("temp/temp1", temperature1);   //wywala bad
    
     }
 
@@ -244,12 +263,6 @@ int a = analogRead(pinTempSensor);
   }
   
     delay(100);
- sensors.requestTemperatures(); 
-  float temperatureC = sensors.getTempCByIndex(0);
-  float temperatureF = sensors.getTempFByIndex(0);
-  Serial.print(temperatureC);
-  Serial.println("ºC");
-  float temp=temperatureC;
 
 
 } 
