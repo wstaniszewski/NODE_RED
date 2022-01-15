@@ -39,7 +39,7 @@ const char* password = "staniszewski123456";
 const char* mqtt_server = "192.168.0.2";
 //const int mqttPort = 12948;
 const char* mqttUser = "wojtek";
-const char* mqttPassword = "tigerclaw12";
+const char* mqttPassword = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
 
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
