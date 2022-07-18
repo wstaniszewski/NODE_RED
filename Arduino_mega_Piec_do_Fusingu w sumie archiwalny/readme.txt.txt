@@ -1,0 +1,1 @@
+2022-07-18 w symie to może kiedyś zrobie to na nodemcu
