@@ -32,12 +32,15 @@ private:
 	const char* 		MQTT_DESTINATION = "/5731501049@lamduan.mfu.ac.th/MFUTHINGS-APP";
 	const uint16_t 		MQTT_PORT = 1883;
 	const uint16_t 		INTERVAL = 60000;
+	const uint16_t		CONNECTION_INTERVAL = 10000;
 	const signed int 	ON_VALUE = 1;
 	const signed int 	OFF_VALUE = -1;
 	const signed int 	CONNECTING_VALUE = -777;
 	int					OUT_PIN;
+	int 				FIRST_CONNECTED = 1;
 	uint16_t 			ID;
 	unsigned long 		PREVIOUS_MILLIS = 0;
+	unsigned long 		CONNECTION_PREVIOUS_MILLIS = 0;
 	unsigned long 		CURRENT_MILLIS;
 	signed int 			VALUE = -1;
 	std::string			KEY;
@@ -47,6 +50,7 @@ private:
 	bool authorized(uint16_t id, std::string key);
 	void callback(char* topic, byte* payload, unsigned int length);
 	void connectMQTT();
+	void connectionResponse();
 	void response();
 	void sentConnectMessage();
 	void setMQTT(const char* server, const uint16_t port);

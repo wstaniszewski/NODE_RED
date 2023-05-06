@@ -169,6 +169,14 @@ void MFUthings::connectWiFi(std::string ssid, std::string password, uint16_t pin
 	}
 }
 
+void MFUthings::connectionResponse(){
+	char* id = new char[10];
+	id = itoa(ID,id,10);
+	std::string value = "-999";
+	std::string response = std::string(id)+"/"+std::string(KEY)+"/"+value;
+	mqttClient.publish(MQTT_DESTINATION,response.c_str());
+}
+
 /**
 *
 * genMQTTID 	=> generate random string and assign to MQTT ID
@@ -177,18 +185,18 @@ void MFUthings::connectWiFi(std::string ssid, std::string password, uint16_t pin
 */
 std::string MFUthings::genMQTTID( size_t length )
 {
-    auto randchar = []() -> char
-    {
-        const char charset[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-        const size_t max_index = (sizeof(charset) - 1);
-        return charset[ rand() % max_index ];
-    };
-    std::string str(length,0);
-    std::generate_n( str.begin(), length, randchar );
-    return str;
+	auto randchar = []() -> char
+	{
+		const char charset[] =
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+		const size_t max_index = (sizeof(charset) - 1);
+		return charset[ rand() % max_index ];
+	};
+	std::string str(length,0);
+	std::generate_n( str.begin(), length, randchar );
+	return str;
 }
 
 /**
@@ -197,6 +205,11 @@ std::string MFUthings::genMQTTID( size_t length )
 * @return 	void
 */
 void MFUthings::handle(){
+	if(FIRST_CONNECTED == 1){
+		delay(3000);
+		response();
+		FIRST_CONNECTED = 0;
+	}
 	if (WiFi.status() != WL_CONNECTED)
 	{
 		Serial.print("Reconnecting");
@@ -210,6 +223,13 @@ void MFUthings::handle(){
 		Serial.println(WiFi.localIP());
 	}
 	CURRENT_MILLIS = millis();
+	if (CURRENT_MILLIS - CONNECTION_PREVIOUS_MILLIS >= CONNECTION_INTERVAL) {
+		CONNECTION_PREVIOUS_MILLIS = CURRENT_MILLIS;
+		if (!mqttClient.connected()) {
+			connectMQTT();
+		}
+		connectionResponse();
+	}
 	if (CURRENT_MILLIS - PREVIOUS_MILLIS >= INTERVAL) {
 		PREVIOUS_MILLIS = CURRENT_MILLIS;
 		if (!mqttClient.connected()) {
@@ -229,6 +249,12 @@ void MFUthings::handle(){
 * @return 	void
 */
 void MFUthings::handle(signed int val){
+	if(FIRST_CONNECTED == 1){
+		VALUE = val;
+		delay(3000);
+		response();
+		FIRST_CONNECTED = 0;
+	}
 	if (WiFi.status() != WL_CONNECTED)
 	{
 		Serial.print("Reconnecting");
@@ -242,6 +268,13 @@ void MFUthings::handle(signed int val){
 		Serial.println(WiFi.localIP());
 	}
 	CURRENT_MILLIS = millis();
+	if (CURRENT_MILLIS - CONNECTION_PREVIOUS_MILLIS >= CONNECTION_INTERVAL) {
+		CONNECTION_PREVIOUS_MILLIS = CURRENT_MILLIS;
+		if (!mqttClient.connected()) {
+			connectMQTT();
+		}
+		connectionResponse();
+	}
 	if (CURRENT_MILLIS - PREVIOUS_MILLIS >= INTERVAL) {
 		VALUE = val;
 		PREVIOUS_MILLIS = CURRENT_MILLIS;
