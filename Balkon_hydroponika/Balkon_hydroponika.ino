@@ -1,18 +1,25 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
-const char* ssid = "wojtek 24";
+const char* ssid = "wojtek24";
 const char* password = "staniszewski123456";
 const char* mqtt_server = "192.168.0.10";
-const int circulation_pin = D2;
+const char* mqtt_username = "wojtek"; // Set your MQTT server username if required
+const char* mqtt_password = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
+const int circulation_pin = D4;
 const int temp_pin = A0;
+const int dolewka_pin = D0;
+const int digital_read_pin = D7;
 
 WiFiClient esp_balkon;
 PubSubClient client(esp_balkon);
 
 void setup() {
   pinMode(circulation_pin, OUTPUT);
-  digitalWrite(circulation_pin, LOW);
+  pinMode(dolewka_pin, OUTPUT);
+  pinMode(digital_read_pin, INPUT);
+  digitalWrite(circulation_pin, HIGH);
+  digitalWrite(dolewka_pin, HIGH);
 
   Serial.begin(115200);
   setup_wifi();
@@ -47,9 +54,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if (strcmp(topic, "balkon/cyrkulacja") == 0) {
     if (msg == "on") {
-      digitalWrite(circulation_pin, HIGH);
-    } else if (msg == "off") {
       digitalWrite(circulation_pin, LOW);
+    } else if (msg == "off") {
+      digitalWrite(circulation_pin, HIGH);
+    }
+  }
+
+  if (strcmp(topic, "balkon/dolewka") == 0) {
+    if (msg == "on") {
+      digitalWrite(dolewka_pin, LOW);
+    } else if (msg == "off") {
+      digitalWrite(dolewka_pin, HIGH);
     }
   }
 }
@@ -57,12 +72,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    if (client.connect("esp_balkon")) {
+    if (client.connect("esp_balkon", mqtt_username, mqtt_password)) {
       Serial.println("connected");
       client.subscribe("balkon/cyrkulacja");
+      client.subscribe("balkon/dolewka");
     } else {
       Serial.print("failed, rc=");
-      Serial.print(clieznt.state());
+      Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
       delay(5000);
     }
@@ -81,6 +97,11 @@ void loop() {
   dtostrf(temperature, 5, 2, temp_str);
 
   client.publish("balkon/temp_zaw", temp_str);
-  
+
+  int digital_read_value = digitalRead(digital_read_pin);
+  char digital_read_str[10];
+  itoa(digital_read_value, digital_read_str, 10);
+
+  client.publish("balkon/digital_read", digital_read_str);
   delay(1000);
 }
