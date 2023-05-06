@@ -62,7 +62,7 @@ void reconnect() {
       client.subscribe("balkon/cyrkulacja");
     } else {
       Serial.print("failed, rc=");
-      Serial.print(client.state());
+      Serial.print(clieznt.state());
       Serial.println(" try again in 5 seconds");
       delay(5000);
     }
