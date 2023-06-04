@@ -1,21 +1,66 @@
 import machine
-import time
+import network
+import utime
+from umqtt.simple2 import MQTTClient
 
-# Define LED pins
-led_pin_1 = machine.Pin(20, machine.Pin.OUT)
-led_pin_2 = machine.Pin(21, machine.Pin.OUT)
+# Define LED pin
+led_pin = machine.Pin(20, machine.Pin.OUT)
 
-# Blink the LEDs
+# Define Wi-Fi settings
+wifi_ssid = "wojtek"
+wifi_password = "staniszewski123456"
+
+# Define MQTT settings
+mqtt_broker = "194.183.54.87"
+mqtt_user = "wojtek"
+mqtt_password = "69AGjfsuWm8aMviMtTfdMPCpjz68mj"
+mqtt_topic_analog = "szklarnia/analog"
+mqtt_topic_cyrkulacja1 = "szklarnia/cyrkulacja1"
+
+# Connect to Wi-Fi
+wifi = network.WLAN(network.STA_IF)
+wifi.active(True)
+wifi.connect(wifi_ssid, wifi_password)
+
+# Wait until connected to Wi-Fi
+while not wifi.isconnected():
+    utime.sleep(1)
+
+print("Connected to Wi-Fi")
+print("IP address:", wifi.ifconfig()[0])
+
+# Define MQTT callback function
+def mqtt_callback(topic, msg):
+    print("Received message:", msg)
+    if topic.decode() == mqtt_topic_cyrkulacja1:
+        if msg == b"on":
+            led_pin.on()
+            print("LED switched ON")
+        elif msg == b"off":
+            led_pin.off()
+            print("LED switched OFF")
+
+# Connect to MQTT broker
+mqtt_client = MQTTClient("pico_client", mqtt_broker, user=mqtt_user, password=mqtt_password)
+mqtt_client.set_callback(mqtt_callback)
+mqtt_client.connect()
+
+print("Connected to MQTT broker")
+
+# Subscribe to MQTT topic
+mqtt_client.subscribe(mqtt_topic_cyrkulacja1)
+print("Subscribed to topic:", mqtt_topic_cyrkulacja1)
+
+# Main loop
 while True:
-    led_pin_1.on()  # Turn on LED 1
-    led_pin_2.off()  # Turn off LED 2
-    time.sleep(1)  # Wait for 1 second
+    mqtt_client.check_msg()  # Check for incoming MQTT messages
 
-    led_pin_1.off()  # Turn off LED 1
-    led_pin_2.on()  # Turn on LED 2
-    time.sleep(1)  # Wait for 1 second
+    # Read A0 value
+    adc = machine.ADC(machine.Pin(26))
+    a0_value = adc.read()
 
-# add code for blinking of internal leds
+    # Publish A0 value on MQTT topic
+    mqtt_client.publish(mqtt_topic_analog, str(a0_value))
+    print("Published A0 value:", a0_value)
 
-
-
+    utime.sleep(1)

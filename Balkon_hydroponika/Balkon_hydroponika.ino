@@ -6,10 +6,10 @@ const char* password = "staniszewski123456";
 const char* mqtt_server = "192.168.0.10";
 const char* mqtt_username = "wojtek"; 
 const char* mqtt_password = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
-const int circulation_pin = D4;
+const int circulation_pin = 4;
 const int temp_pin = A0;
-const int dolewka_pin = D0;
-const int digital_read_pin = D7;
+const int dolewka_pin = 0;
+const int digital_read_pin = 7;
 unsigned long czas_dolewki = 0;           // to jest C więc trzaba zadeklarować zmienne globalne na początku
 
 WiFiClient esp_balkon;
