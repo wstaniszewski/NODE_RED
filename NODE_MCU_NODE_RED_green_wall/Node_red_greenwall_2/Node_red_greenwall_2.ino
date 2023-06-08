@@ -50,7 +50,7 @@ const int lamp1 = D5;
 const int zawor = D3;
 const int lamp2 = D6;
 const int cyrkulacja = D7;
-
+const int cyrkulacja1 = 2;
 
 // Timers auxiliar variables
 long now = millis();
@@ -184,7 +184,7 @@ void reconnect() {
        if (client.connect("ESP2_Garage")) {
       That should solve your MQTT multiple connections problem
     */
-    if (client.connect("esp_greenwall", 
+    if (client.connect("esp_greenwall")){
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
       // You can subscribe to more topics (to control more LEDs in this example)

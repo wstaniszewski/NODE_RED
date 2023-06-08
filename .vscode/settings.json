@@ -1,3 +1,4 @@
 {
-    "C_Cpp.default.compilerPath": ""
+    "C_Cpp.default.compilerPath": "",
+    "cmake.sourceDirectory": "D:/Dysk_Google/Warsztat/Elektronika/NODE_RED/libraries/Adafruit_BusIO"
 }
