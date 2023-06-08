@@ -128,7 +128,7 @@ const int lamp2 = D6;
 const int cyrkulacja = D7;
 const char* tempTopic = "szklarnia/temp";
 const char* humTopic = "szklarnia/hum";
-const char* distance = "szklarnia/distance";
+
 
 // Timers auxiliar variables
 long now = millis();
@@ -436,11 +436,25 @@ if (isnan(event.relative_humidity)) {
   snprintf(humidityStr, sizeof(humidityStr), "%.2f", event.relative_humidity);
   client.publish(humTopic, humidityStr);
 }
- // Pass INC as a parameter to get the distance in inches
   distance = ultrasonic.read();
   
-  Serial.print("Distance in CM: ");
+  Serial.print("Distance in CM -: ");
   Serial.println(distance);
+//publish distance
+  char distanceStr[7];
+  snprintf(distanceStr, sizeof(distanceStr), "%.2f", distance);  // napisz co to robi !!!!!!!!
+
+  //declare disTopic
+  const char* distTopic;
+  
+  // distTopic = "szklarnia/dist";  // to jest nie potrzebne
+
+  //client.publish(distTopic, distanceStr);      // to nie dziala
+  //client.publish("szklarnia/distance", String(distance));   // to nie dziala
+client.publish("szklarnia/distance", String(distance).c_str());
+  delay(1000);
+
+  
 
 
 } 
