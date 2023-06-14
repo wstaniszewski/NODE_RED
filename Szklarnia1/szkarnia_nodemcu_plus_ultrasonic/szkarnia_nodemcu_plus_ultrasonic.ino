@@ -150,6 +150,12 @@ void setup_wifi() {
   Serial.println("");
   Serial.print("WiFi connected - ESP IP address: ");
   Serial.println(WiFi.localIP());
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
+
+
+
+
 }
 
 
