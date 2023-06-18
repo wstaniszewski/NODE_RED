@@ -39,7 +39,7 @@
 
 /*****
  
- All the resources for this project:   fff
+ All the resources for this project:  
  https://randomnerdtutorials.com/
  
 *****/
@@ -50,8 +50,6 @@
 
 // for temp reading fron analog grove sensor
 #include <math.h>
-
-
 
 
 // Fragment dla DHT sensor
@@ -72,12 +70,12 @@
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
-uint32_t delayMS;
+uint32_t delayMS; 
 
 // end of DHC22 part
 
 
-//ultrasonic
+//ultrasonic  GROVE -3 pinowy
 /*
  * Pass as a parameter the trigger and echo pin, respectively,
  * or only the signal pin (for sensors 3 pins), like:
@@ -116,8 +114,8 @@ const char* mqttPassword = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
 
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
-WiFiClient esp_szklarnia;
-PubSubClient client(esp_szklarnia);
+WiFiClient esp_szklarnia1;
+PubSubClient client(esp_szklarnia1);
 
 
 
@@ -150,8 +148,8 @@ void setup_wifi() {
   Serial.println("");
   Serial.print("WiFi connected - ESP IP address: ");
   Serial.println(WiFi.localIP());
-  WiFi.setAutoReconnect(true);
-  WiFi.persistent(true);
+  WiFi.setAutoReconnect(true);   // nie zrobilo widocznej różnicy
+  WiFi.persistent(true);         // nie zrobilo widocznej różnicy
 
 
 
@@ -180,7 +178,9 @@ void callback(String topic, byte* message, unsigned int length) {
   if(topic=="szklarnia/cyrkulacja1"){
       Serial.print("cyrkulacja1 jest ");
       if(messageTemp == "on"){
-        digitalWrite(cyrkulacja1, LOW);
+        digitalWrite(cyrkulacja1, LOW);   //dioda
+        digitalWrite(cyrkulacja, HIGH);    // PIN D7
+
      
           Serial.print("zawór On");
      //     delay (50000);
@@ -190,6 +190,7 @@ void callback(String topic, byte* message, unsigned int length) {
       }
       else if(messageTemp == "off"){
                digitalWrite(cyrkulacja1, HIGH);
+               digitalWrite(cyrkulacja, LOW);
         Serial.print("cyrkulacja1 jest  Off");
       }
   }
@@ -238,6 +239,7 @@ void callback(String topic, byte* message, unsigned int length) {
 // This functions reconnects your ESP8266 to your MQTT broker
 // Change the function below if you want to subscribe to more topics with your ESP8266 
 void reconnect() {
+
   // Loop until we're reconnected
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
@@ -265,9 +267,9 @@ void reconnect() {
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
-      Serial.println(" try again in 5 seconds");
+      Serial.println(" try again in 15 seconds");
       // Wait 5 seconds before retrying
-      delay(5000);
+      delay(15000);
     }
   }
 }
@@ -337,7 +339,7 @@ void loop() {
     reconnect();
   }
   if(!client.loop())
-    client.connect("esp_test");
+    client.connect("esp_szklarnia");
 
   now = millis();
 
@@ -451,15 +453,35 @@ if (isnan(event.relative_humidity)) {
   snprintf(distanceStr, sizeof(distanceStr), "%.2f", distance);  // napisz co to robi !!!!!!!!
 
   //declare disTopic
-  const char* distTopic;
-  
-  // distTopic = "szklarnia/dist";  // to jest nie potrzebne
-
+  //const char* distTopic;
+    // distTopic = "szklarnia/dist";  // to jest nie potrzebne
   //client.publish(distTopic, distanceStr);      // to nie dziala
   //client.publish("szklarnia/distance", String(distance));   // to nie dziala
 client.publish("szklarnia/distance", String(distance).c_str());
   delay(1000);
 
+  // if wifi is down, try to reconnect
+  if (WiFi.status() != WL_CONNECTED) {   // jak nie jest  podłczony do wifi to połacz
+  setup_wifi();
+  if  (WiFi.status() == WL_CONNECTED) {   // jak się połaczył to łacz z MQTT
+
+// to jest jest potrzebne żeby łaczył się z MQTT  po zerwaniu WiFi
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+
+    while (!client.connected()) {
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword)) {
+      Serial.println("Connected to MQTT broker");
+      client.subscribe("szklarnia/cyrkulacja1"); // Subscribe to a specific MQTT topic
+    } else {
+      Serial.print("Failed to connect to MQTT broker, rc=");
+      Serial.print(client.state());
+      Serial.println(" Retrying in 5 seconds...");
+      delay(5000);
+    }}}
+
+
+  }
   
 
 
