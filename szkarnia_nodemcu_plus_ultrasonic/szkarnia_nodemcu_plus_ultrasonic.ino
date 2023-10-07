@@ -114,8 +114,8 @@ const char* mqttPassword = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
 
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
-WiFiClient esp_szklarnia1;
-PubSubClient client(esp_szklarnia1);
+WiFiClient esp_szklarnia;
+PubSubClient client(esp_szklarnia);
 
 
 
@@ -255,6 +255,22 @@ void reconnect() {
        if (client.connect("ESP2_Garage")) {
       That should solve your MQTT multiple connections problem
     */
+    setup_wifi();
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+
+    while (!client.connected()) {
+    if (client.connect("ESP8266Client", mqttUser, mqttPassword)) {
+      Serial.println("Connected to MQTT broker");
+      client.subscribe("szklarnia/cyrkulacja1"); // Subscribe to a specific MQTT topic
+    } else {
+      Serial.print("Failed to connect to MQTT broker, rc=");
+      Serial.print(client.state());
+      Serial.println(" Retrying in 30 seconds...");
+      delay(30000);
+    }
+
+    
     if (client.connect("esp_szklarnia")){
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
@@ -267,11 +283,12 @@ void reconnect() {
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
-      Serial.println(" try again in 15 seconds");
+      Serial.println(" try again in 30 seconds (second loop");
       // Wait 5 seconds before retrying
-      delay(15000);
+      delay(30000);
     }
   }
+}
 }
 
 // The setup function sets your ESP GPIOs to Outputs, starts the serial communication at a baud rate of 115200
@@ -296,8 +313,8 @@ void setup() {
     } else {
       Serial.print("Failed to connect to MQTT broker, rc=");
       Serial.print(client.state());
-      Serial.println(" Retrying in 5 seconds...");
-      delay(5000);
+      Serial.println(" Retrying in 15 seconds...");
+      delay(15000);
     }
   }
 // DHT22 part do setup
@@ -326,7 +343,7 @@ dht.begin();
   Serial.print  (F("Resolution:  ")); Serial.print(sensor.resolution); Serial.println(F("%"));
   Serial.println(F("------------------------------------"));
   // Set delay between sensor readings based on sensor details.
-  delayMS = sensor.min_delay / 1000;
+  delayMS = sensor.min_delay / 2000;
 
 // ebd of dht22 part setup
 
@@ -341,6 +358,7 @@ void loop() {
   if(!client.loop())
     client.connect("esp_szklarnia");
 
+/*    // wyciety analog sensor i  zabezpiecznie termiczne zaworu
   now = millis();
 
 
@@ -382,11 +400,17 @@ int a = analogRead(pinTempSensor);
   digitalWrite(zawor, LOW);
   }
   
+  
     delay(100);
+
+
+    */
 //DHT part dla void loop
 
  // Delay between measurements.
   delay(delayMS);
+
+
   // Get temperature event and print its value.
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -397,11 +421,9 @@ int a = analogRead(pinTempSensor);
     Serial.print(F("Temperature: "));
     Serial.print(event.temperature);
     Serial.println(F("°C"));
-
-
-    
-
+ 
   }
+
   // Get humidity event and print its value.
   dht.humidity().getEvent(&event);
   if (isnan(event.relative_humidity)) {
@@ -476,8 +498,8 @@ client.publish("szklarnia/distance", String(distance).c_str());
     } else {
       Serial.print("Failed to connect to MQTT broker, rc=");
       Serial.print(client.state());
-      Serial.println(" Retrying in 5 seconds...");
-      delay(5000);
+      Serial.println(" Retrying in 30 seconds...");
+      delay(30000);
     }}}
 
 
