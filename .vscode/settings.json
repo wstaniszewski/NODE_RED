@@ -18,5 +18,6 @@
             "command": "extension.execute",
             "priority": 4
         }
-    ]
+    ],
+    "dotnet.defaultSolution": "libraries/CmdMessenger/extras/CSharp/CmdMessenger.sln"
 }
