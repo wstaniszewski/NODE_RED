@@ -40,8 +40,8 @@ const char* mqttPassword = "69AGjfsuWm8aMviMtTfdMPCpjz68mj";
 
 
 // Initializes the espClient. You should change the espClient name if you have multiple ESPs running in your home automation system
-WiFiClient esp_greenwall;
-PubSubClient client(esp_greenwall);
+WiFiClient esp_greenwall2;
+PubSubClient client(esp_greenwall2);
 
 
 
@@ -113,7 +113,7 @@ void callback(String topic, byte* message, unsigned int length) {
 
   // If a message is received on the topic kuchnia/podlewanie, you check if the message is either on or off. Turns the lamp GPIO according to the message
   if(topic=="kuchnia/lamp1"){
-      Serial.print("esp_greenwall  jest ");
+      Serial.print("esp_greenwall2  jest ");
       if(messageTemp == "on"){
         digitalWrite(lamp1, HIGH);
      
@@ -184,10 +184,10 @@ void reconnect() {
        if (client.connect("ESP2_Garage")) {
       That should solve your MQTT multiple connections problem
     */
-    if (client.connect("esp_greenwall")){
+    if (client.connect("esp_greenwall2")){
       Serial.println("connected");  
       // Subscribe or resubscribe to a topic
-      // You can subscribe to more topics (to control more LEDs in this example)
+      // You can subscribe to more topics- (to control more LEDs in this example)
       client.subscribe("kuchnia/podlewanie");
         client.subscribe("kuchnia/temp_zaw");
         client.subscribe("kuchnia/lamp1");
